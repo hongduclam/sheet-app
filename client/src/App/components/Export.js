@@ -39,7 +39,7 @@ function FileSelectList() {
     setSelectedItem(selectedItem)
   }
 
-  return <div>
+  return <div style={{overflow: 'auto', height: `calc(100vh - 250px)`}}>
     <h5> File List </h5>
     {loading && <Spinner>{' '}</Spinner>}
     <ListGroup>
@@ -119,6 +119,7 @@ function Export() {
           <strong>
             {selectedItem.name}
           </strong>
+          <br />
           <Button onClick={handleExport}>
             Export File
             {' '}
