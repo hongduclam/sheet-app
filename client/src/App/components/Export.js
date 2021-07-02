@@ -25,16 +25,16 @@ function Export({data = [], cols = [], onExport, loading}) {
 
   return (
     <div>
-      <div id={'grid_container'} className="grid_container" ref={gridRef} style={{overflow: 'auto', maxHeight: 'calc(100vh - 250px)'}}/>
-      <br />
+      <div id={'grid_container'} className="grid_container" ref={gridRef}
+           style={{overflow: 'auto', maxHeight: 'calc(100vh - 250px)'}}/>
+      <br/>
       {
-        loading && <Spinner style={{ width: '3rem', height: '3rem' }} />
+        <Button onClick={handleExport} style={{float: 'right'}}>
+          Export File
+          {' '}
+          {loading && <Spinner size="sm">{' '}</Spinner>}
+        </Button>
       }
-      <Button onClick={handleExport} style={{float: 'right'}}>
-        {
-          loading ? <Spinner style={{ width: '3rem', height: '3rem' }} /> : 'Export File'
-        }
-      </Button>
     </div>
   );
 }
