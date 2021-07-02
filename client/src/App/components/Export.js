@@ -56,11 +56,11 @@ function Export({data = {}}) {
 
   return (
     <Row>
-      <Col md={3} style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', alignContent: 'flex-end'}}>
+      <Col md={2} style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', alignContent: 'flex-end'}}>
         <div>
-          <h4>
+          <h5>
             {data.sheetName}
-          </h4>
+          </h5>
           <Button onClick={handleExport} style={{float: 'right'}}>
             Export File
             {' '}
@@ -68,7 +68,7 @@ function Export({data = {}}) {
           </Button>
         </div>
       </Col>
-      <Col md={9}>
+      <Col md={10}>
         <div id={'grid_container'} className="grid_container" ref={gridRef}
              style={{overflow: 'auto', maxHeight: 'calc(100vh - 150px)'}}/>
       </Col>

@@ -15,7 +15,7 @@ function Home(props) {
       <Fade in={!gridData} tag="div">
         {
           !gridData && <Row>
-            <Col md={3}>
+            <Col md={2}>
               <Import onImport={handleOnImport}/>
             </Col>
           </Row>
