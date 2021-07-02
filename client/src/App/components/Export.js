@@ -147,7 +147,7 @@ function Export() {
           </strong>
           <br/>
           <Button onClick={handleExport}>
-            Export File
+            Export
             {' '}
             {exLoading && <Spinner size={'sm'}>{' '}</Spinner>}
           </Button>
