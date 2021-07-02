@@ -55,25 +55,49 @@ function FileSelectList() {
   </div>
 }
 
+function parseSheetData(canvasGridData) {
+  return canvasGridData.map(item => {
+    if (!Array.isArray(item)) {
+      return Object.values(item);
+    }
+    return item;
+  })
+}
+
 function Export() {
   const {selectedItem} = useHomeContext()
   const [exLoading, setExLoading] = React.useState(false);
+  const [saveLoading, setSaveLoading] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [gridData, setGridData] = React.useState();
 
   let canvasGrid = null;
   const gridRef = React.useRef(null);
 
-  const handleExport = React.useCallback(() => {
-    setExLoading(true);
-    const ws = XLSX.utils.aoa_to_sheet(canvasGrid.data);
+  function handleSave() {
+    setSaveLoading(true);
+    const ws = XLSX.utils.aoa_to_sheet((parseSheetData(canvasGrid.data)));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, gridData.sheetName || 'Sheet 1');
     const wopts = {bookType: 'xlsx', bookSST: false, type: 'array'};
     const wbout = XLSX.write(wb, wopts);
     const file = new Blob([wbout], {type: "application/octet-stream"});
-    uploadFile(file, selectedItem.name).then(rs => {
-      XLSX.writeFile(wb, rs.data.name)
+    return uploadFile(file, selectedItem.name).then(rs => {
+      return {
+        wb,
+        fileName: rs.data.name
+      }
+    }).catch(() => {
+      alert("Something went wrong!")
+    }).finally(() => {
+      setSaveLoading(false)
+    })
+  }
+
+  const handleExport = React.useCallback(() => {
+    setExLoading(true);
+    handleSave().then(rs => {
+      XLSX.writeFile(rs.wb, rs.fileName)
     }).catch(() => {
       alert("Something went wrong!")
     }).finally(() => {
@@ -82,19 +106,21 @@ function Export() {
   }, [gridData, canvasGrid, selectedItem])
 
   React.useEffect(() => {
-    if(gridData) {
+    if (gridData) {
+      canvasGrid && canvasGrid.removeEventListener('endedit', handleSave)
       gridRef.current.innerHTML = ''
       canvasGrid = CanvasDatagrid({
         parentNode: gridRef.current,
         data: parseData(gridData.data),
-        showNewRow: true,
-        scrollHeight: 500,
-        scrollWidth: 500
+        showNewRow: true
       });
+      canvasGrid.addEventListener('endedit', handleSave)
     }
-    return () => gridRef.current.innerHTML = ''
+    return () => {
+      canvasGrid && canvasGrid.removeEventListener('endedit', handleSave)
+      gridRef.current.innerHTML = ''
+    }
   }, [gridData])
-
 
 
   React.useEffect(() => {
@@ -114,22 +140,29 @@ function Export() {
     <Row style={{height: 'calc(100vh - 100px)'}}>
       <Col md={2}>
         <FileSelectList/>
-        <hr />
+        <hr/>
         <div style={{textAlign: 'right'}}>
           <strong>
             {selectedItem.name}
           </strong>
-          <br />
+          <br/>
           <Button onClick={handleExport}>
             Export File
             {' '}
             {exLoading && <Spinner size={'sm'}>{' '}</Spinner>}
           </Button>
+          {' '}
+          <Button onClick={handleSave}>
+            Save
+            {' '}
+            {saveLoading && <Spinner size={'sm'}>{' '}</Spinner>}
+          </Button>
         </div>
       </Col>
       <Col md={10}>
         {loading && <Spinner>{' '}</Spinner>}
-        <div id={'grid_container'} className="grid_container" ref={gridRef} style={{overflow: 'auto', height: `calc(100vh - 100px)`}}/>
+        <div id={'grid_container'} className="grid_container" ref={gridRef}
+             style={{overflow: 'auto', height: `calc(100vh - 100px)`}}/>
       </Col>
     </Row>
   );
