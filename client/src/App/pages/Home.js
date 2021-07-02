@@ -4,35 +4,45 @@ import Import from "../components/Import";
 import Export from "../components/Export";
 import {Container, Row, Col, Fade} from 'reactstrap'
 
-function Home(props) {
-  const [gridData, setGridData] = React.useState();
-  const handleOnImport = React.useCallback((importData) => {
-    setGridData(importData)
-  }, [])
+const HomeContext = React.createContext();
 
+export function useHomeContext() {
+  return React.useContext(HomeContext);
+}
+
+function Home() {
+  const [gridData, setGridData] = React.useState();
+  const [selectedItem, setSelectedItem] = React.useState();
   return (
-    <Container fluid>
-      <Fade in={!gridData} tag="div">
-        {
-          !gridData && <Row>
-            <Col md={2}>
-              <Import onImport={handleOnImport}/>
-            </Col>
-          </Row>
-        }
-      </Fade>
-      {
-        <Fade in={!!gridData} tag="div">
+    <HomeContext.Provider value={{
+      gridData,
+      setGridData,
+      selectedItem,
+      setSelectedItem
+    }}>
+      <Container fluid>
+        <Fade in={!selectedItem} tag="div">
           {
-            gridData && <Row>
-              <Col md={12}>
-                <Export data={gridData}/>
+            !selectedItem && <Row>
+              <Col md={2}>
+                <Import />
               </Col>
             </Row>
           }
         </Fade>
-      }
-    </Container>
+        {
+          <Fade in={!!selectedItem} tag="div">
+            {
+              selectedItem && <Row>
+                <Col md={12}>
+                  <Export />
+                </Col>
+              </Row>
+            }
+          </Fade>
+        }
+      </Container>
+    </HomeContext.Provider>
   );
 }
 

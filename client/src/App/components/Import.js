@@ -1,7 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import * as XLSX from "xlsx";
-import {Button, Form, FormGroup, Label, Input, FormText, Spinner} from 'reactstrap';
+import {Form, FormGroup, Input, Spinner} from 'reactstrap';
+import {uploadFile} from "../apis";
+import {useHomeContext} from "../pages/Home";
 
 
 const SheetJSFT = [
@@ -21,7 +21,7 @@ function DragDropFile({handleFile}) {
     e.preventDefault();
     const files = e.dataTransfer.files;
     const file = files[0];
-    if(file) {
+    if (file) {
       handleFile(file)
       setFileName(file.name)
     }
@@ -54,39 +54,23 @@ function DragDropFile({handleFile}) {
   );
 }
 
-/* generate an array of column objects */
-const make_cols = refstr => {
-  let o = [], C = XLSX.utils.decode_range(refstr).e.c + 1;
-  for (var i = 0; i < C; ++i) o[i] = {name: XLSX.utils.encode_col(i), key: i}
-  return o;
-};
 
-
-function Import({onImport}) {
+function Import() {
+  const {setSelectedItem} = useHomeContext()
   const [loading, setLoading] = React.useState(false);
 
   const handleFile = (file) => {
     setLoading(true)
-    const reader = new FileReader();
-    const rABS = !!reader.readAsBinaryString;
-    reader.onload = (e) => {
-      /* Parse data */
-      const bstr = e.target.result;
-      const wb = XLSX.read(bstr, {type: rABS ? 'binary' : 'array'});
-      /* Get first worksheet */
-      const wsname = wb.SheetNames[0];
-      const ws = wb.Sheets[wsname];
-      /* Convert array of arrays */
-      const data = XLSX.utils.sheet_to_json(ws, {header: 1});
-      /* Update state */
-      onImport({
-        data,
-        cols: make_cols(ws['!ref']),
-        sheetName: wsname
-      })
+    uploadFile(file, file.name).then(rs => {
+      setSelectedItem({
+        name: rs.data.name
+      });
       setLoading(false)
-    };
-    if (rABS) reader.readAsBinaryString(file); else reader.readAsArrayBuffer(file);
+    }).catch(() => {
+      alert("Something went wrong!")
+      setLoading(false)
+    }).finally(() => {
+    })
   }
 
   const handleChange = (e) => {

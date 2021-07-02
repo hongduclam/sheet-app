@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 
 const multer = require('multer')
@@ -15,11 +16,27 @@ var storage = multer.diskStorage(
 const upload = multer({storage})
 
 
-
 const app = express();
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, 'client/build')));
+
+//listing all of the API endoings under '/api'
+app.get('/list-files', (req,res) => {
+  let rs = [];
+  fs.readdirSync('./public/uploads/').forEach(file => {
+    console.log(file);
+    rs.push({
+      name: file
+    })
+  });
+  res.json(rs);
+});
+
+app.get('/download', function(req, res){
+  const file = `./public/uploads/${req.query.name}`;
+  res.download(file); // Set disposition and send it.
+});
 
 // An api endpoint that returns a short list of items
 app.post('/upload', upload.single('file'), function (req, res) {
