@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as XLSX from "xlsx";
-import {Button, Form, FormGroup, Label, Input, FormText} from 'reactstrap';
+import {Button, Form, FormGroup, Label, Input, FormText, Spinner} from 'reactstrap';
 
 
 const SheetJSFT = [
@@ -63,8 +63,10 @@ const make_cols = refstr => {
 
 
 function Import({onImport}) {
+  const [loading, setLoading] = React.useState(false);
 
   const handleFile = (file) => {
+    setLoading(true)
     const reader = new FileReader();
     const rABS = !!reader.readAsBinaryString;
     reader.onload = (e) => {
@@ -82,6 +84,7 @@ function Import({onImport}) {
         cols: make_cols(ws['!ref']),
         sheetName: wsname
       })
+      setLoading(false)
     };
     if (rABS) reader.readAsBinaryString(file); else reader.readAsArrayBuffer(file);
   }
@@ -93,12 +96,15 @@ function Import({onImport}) {
 
   return (
     <Form>
-      <DragDropFile handleFile={handleFile}/>
-      <br/>
-      <FormGroup>
-        Or <Input type="file" name="file" id="exampleFile" accept={SheetJSFT}
-                  onChange={handleChange}/>
-      </FormGroup>
+      {!loading && <div>
+        <DragDropFile handleFile={handleFile}/>
+        <br/>
+        <FormGroup>
+          Or <Input type="file" name="file" id="exampleFile" accept={SheetJSFT}
+                    onChange={handleChange}/>
+        </FormGroup>
+      </div>}
+      {loading && <Spinner size="lg" style={{float: 'right'}}>{' '}</Spinner>}
     </Form>
   );
 }

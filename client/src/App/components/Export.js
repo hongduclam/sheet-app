@@ -1,17 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import CanvasDatagrid from "canvas-datagrid";
-import {Button, Spinner} from "reactstrap";
+import {Button, Spinner, Row, Col, Fade} from "reactstrap";
+import * as XLSX from "xlsx";
+import {uploadFile} from "../apis";
 
-function Export({data = [], cols = [], onExport, loading}) {
+
+function parseData(json) {
+  const updateData = [...json]
+  var L = 0;
+  updateData.forEach(function(r) {
+    if (L < r.length)
+      L = r.length;
+  });
+  console.log(L);
+  for (var i = json[0].length; i < L; ++i) {
+    updateData[0][i] = "";
+  }
+  return updateData;
+}
+
+function Export({data = {}}) {
   let canvasGrid = null;
   const gridRef = React.useRef(null);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     gridRef.current.innerHTML = ''
     canvasGrid = CanvasDatagrid({
       parentNode: gridRef.current,
-      data,
+      data: parseData(data.data),
       showNewRow: true,
       scrollHeight: 500,
       scrollWidth: 500
@@ -20,22 +38,41 @@ function Export({data = [], cols = [], onExport, loading}) {
   }, [data])
 
   const handleExport = React.useCallback(() => {
-    onExport(canvasGrid.data)
-  }, [data])
+    setLoading(true);
+    const ws = XLSX.utils.aoa_to_sheet(canvasGrid.data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, data.sheetName || 'Sheet 1');
+    const wopts = {bookType: 'xlsx', bookSST: false, type: 'array'};
+    const wbout =  XLSX.write(wb, wopts);
+    const file = new Blob([wbout], {type:"application/octet-stream"});
+    uploadFile(file).then(rs => {
+      XLSX.writeFile(wb, rs.data.name)
+    }).catch(() => {
+      alert("Something went wrong!")
+    }).finally(() => {
+      setLoading(false)
+    })
+  }, [])
 
   return (
-    <div>
-      <div id={'grid_container'} className="grid_container" ref={gridRef}
-           style={{overflow: 'auto', maxHeight: 'calc(100vh - 250px)'}}/>
-      <br/>
-      {
-        <Button onClick={handleExport} style={{float: 'right'}}>
-          Export File
-          {' '}
-          {loading && <Spinner size="sm">{' '}</Spinner>}
-        </Button>
-      }
-    </div>
+    <Row>
+      <Col md={3} style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', alignContent: 'flex-end'}}>
+        <div>
+          <h4>
+            {data.sheetName}
+          </h4>
+          <Button onClick={handleExport} style={{float: 'right'}}>
+            Export File
+            {' '}
+            {loading && <Spinner size="sm">{' '}</Spinner>}
+          </Button>
+        </div>
+      </Col>
+      <Col md={9}>
+        <div id={'grid_container'} className="grid_container" ref={gridRef}
+             style={{overflow: 'auto', maxHeight: 'calc(100vh - 150px)'}}/>
+      </Col>
+    </Row>
   );
 }
 
