@@ -17,7 +17,7 @@ In order to run this project node.js and npm both need to have been installed.
 1. cd client
 2. npm install && npm run build
 3. cd ..
-4. pm2 restart ecosystem.config.js --name sheet-app
+4. npm install && pm2 restart ecosystem.config.js --name sheet-app
 
 
 ## Built With
