@@ -63,6 +63,13 @@ function parseSheetData(canvasGridData) {
     return item;
   })
 }
+function debounce(func, timeout = 500){
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}
 
 function Export() {
   const {selectedItem} = useHomeContext()
@@ -105,22 +112,25 @@ function Export() {
     })
   }, [gridData, canvasGrid, selectedItem])
 
+  const debounceDropDown = debounce(handleSave)
+
   React.useEffect(() => {
     if (gridData) {
-      canvasGrid && canvasGrid.removeEventListener('endedit', handleSave)
+      canvasGrid && canvasGrid.removeEventListener('endedit', debounceDropDown)
       gridRef.current.innerHTML = ''
       canvasGrid = CanvasDatagrid({
         parentNode: gridRef.current,
         data: parseData(gridData.data),
         showNewRow: true
       });
-      canvasGrid.addEventListener('endedit', handleSave)
+      canvasGrid.addEventListener('endedit', debounceDropDown)
     }
     return () => {
-      canvasGrid && canvasGrid.removeEventListener('endedit', handleSave)
+      canvasGrid && canvasGrid.removeEventListener('endedit', debounceDropDown)
       gridRef.current.innerHTML = ''
     }
   }, [gridData])
+
 
 
   React.useEffect(() => {
