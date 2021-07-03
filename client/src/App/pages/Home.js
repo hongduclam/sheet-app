@@ -1,8 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Import from "../components/Import";
 import Export from "../components/Export";
-import {Container, Row, Col, Fade} from 'reactstrap'
+import {Col, Container, Row} from 'reactstrap'
+import FileSelectList from "../components/FileSelectList";
+import * as XLSX from "xlsx";
+import {deleteFile, saveFile} from "../apis";
+import {debounce} from "../helpers";
+import FileActions from "../components/FileActions";
 
 const HomeContext = React.createContext();
 
@@ -12,35 +16,36 @@ export function useHomeContext() {
 
 function Home() {
   const [gridData, setGridData] = React.useState();
+  const [loading, setLoading] = React.useState();
   const [selectedItem, setSelectedItem] = React.useState();
+  const [reloadFileList, setReloadFileList] = React.useState(true);
+  console.log({
+    gridData
+  })
   return (
     <HomeContext.Provider value={{
       gridData,
       setGridData,
       selectedItem,
-      setSelectedItem
+      setSelectedItem,
+      setLoading,
+      loading,
+      reloadFileList,
+      setReloadFileList
     }}>
       <Container fluid>
-        <Fade in={!selectedItem} tag="div">
-          {
-            !selectedItem && <Row>
-              <Col md={2}>
-                <Import />
-              </Col>
-            </Row>
-          }
-        </Fade>
-        {
-          <Fade in={!!selectedItem} tag="div">
-            {
-              selectedItem && <Row>
-                <Col md={12}>
-                  <Export />
-                </Col>
-              </Row>
-            }
-          </Fade>
-        }
+        <Row>
+          <Col md={2}>
+            <Import />
+            <hr />
+            <FileSelectList />
+            <hr />
+            <FileActions />
+          </Col>
+          <Col md={10}>
+            <Export />
+          </Col>
+        </Row>
       </Container>
     </HomeContext.Provider>
   );

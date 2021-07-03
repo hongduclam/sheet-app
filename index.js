@@ -33,9 +33,16 @@ app.get('/list-files', (req,res) => {
   res.json(rs);
 });
 
+app.delete('/delete-file', (req,res) => {
+  const filePath = `./public/uploads/${req.query.name}`;
+  fs.unlink(filePath, function() {
+    res.json({message: "Successfully deleted file", data: req.query.name});
+  });
+});
+
 app.get('/download', function(req, res){
-  const file = `./public/uploads/${req.query.name}`;
-  res.download(file); // Set disposition and send it.
+  const filePath = `./public/uploads/${req.query.name}`;
+  res.download(filePath); // Set disposition and send it.
 });
 
 // An api endpoint that returns a short list of items

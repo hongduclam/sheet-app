@@ -31,7 +31,7 @@ function DragDropFile({handleFile}) {
     <div
       style={{
         width: '100%',
-        height: 300,
+        height: 200,
         border: '1px dashed',
         display: 'flex',
         justifyContent: 'center',
@@ -56,16 +56,16 @@ function DragDropFile({handleFile}) {
 
 
 function Import() {
-  const {setSelectedItem} = useHomeContext()
-  const [loading, setLoading] = React.useState(false);
+  const {setSelectedItem, loading, setLoading, setReloadFileList} = useHomeContext()
 
-  const handleFile = (file) => {
-    setLoading(true)
+  const handleImportFile = (file) => {
+    setLoading('import')
     uploadFile(file, file.name).then(rs => {
       setSelectedItem({
         name: rs.data.name
       });
       setLoading(false)
+      setReloadFileList(true);
     }).catch(() => {
       alert("Something went wrong!")
       setLoading(false)
@@ -75,20 +75,20 @@ function Import() {
 
   const handleChange = (e) => {
     const files = e.target.files;
-    if (files && files[0]) handleFile(files[0]);
+    if (files && files[0]) handleImportFile(files[0]);
   };
 
   return (
     <Form>
-      {!loading && <div>
-        <DragDropFile handleFile={handleFile}/>
+      <div>
+        <DragDropFile handleFile={handleImportFile}/>
+        {loading === 'import' && <Spinner size="lg" style={{float: 'right'}}>{' '}</Spinner>}
         <br/>
         <FormGroup>
           Or <Input type="file" name="file" id="exampleFile" accept={SheetJSFT}
                     onChange={handleChange}/>
         </FormGroup>
-      </div>}
-      {loading && <Spinner size="lg" style={{float: 'right'}}>{' '}</Spinner>}
+      </div>
     </Form>
   );
 }
