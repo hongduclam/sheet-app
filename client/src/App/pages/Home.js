@@ -3,10 +3,10 @@ import Import from "../components/Import";
 import Export from "../components/Export";
 import {Col, Container, Row} from 'reactstrap'
 import FileSelectList from "../components/FileSelectList";
-import * as XLSX from "xlsx";
-import {deleteFile, saveFile} from "../apis";
-import {debounce} from "../helpers";
 import FileActions from "../components/FileActions";
+import {saveFile} from "../apis";
+import {toast} from "react-toastify";
+import {debounce} from "../helpers";
 
 const HomeContext = React.createContext();
 
@@ -19,9 +19,29 @@ function Home() {
   const [loading, setLoading] = React.useState();
   const [selectedItem, setSelectedItem] = React.useState();
   const [reloadFileList, setReloadFileList] = React.useState(true);
+
+
+  function handleSave(callback) {
+    setLoading('save');
+    return saveFile({
+      data: gridData.data,
+      fileName: selectedItem.name,
+      sheetName: gridData.sheetName
+    }).then(rs => {
+      callback && callback(rs)
+      return rs;
+    }).catch(() => {
+      toast.error('Something went wrong!')
+    }).finally(() => {
+      setLoading(false)
+    })
+  }
+
   console.log({
     gridData
   })
+  const debounceSaving = debounce(handleSave)
+
   return (
     <HomeContext.Provider value={{
       gridData,
@@ -31,7 +51,8 @@ function Home() {
       setLoading,
       loading,
       reloadFileList,
-      setReloadFileList
+      setReloadFileList,
+      handleSave: debounceSaving
     }}>
       <Container fluid>
         <Row>

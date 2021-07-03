@@ -2,7 +2,7 @@ import React from 'react';
 import {Form, FormGroup, Input, Spinner} from 'reactstrap';
 import {uploadFile} from "../apis";
 import {useHomeContext} from "../pages/Home";
-
+import { toast } from 'react-toastify';
 
 const SheetJSFT = [
   "xlsx", "xlsb", "xlsm", "xls", "xml", "csv", "txt", "ods", "fods", "uos", "sylk", "dif", "dbf", "prn", "qpw", "123", "wb*", "wq*", "html", "htm"
@@ -66,8 +66,10 @@ function Import() {
       });
       setLoading(false)
       setReloadFileList(true);
+      document.getElementById('exampleFile').value = ''
+      toast.success('Import Successfully!')
     }).catch(() => {
-      alert("Something went wrong!")
+      toast.error('Something went wrong!')
       setLoading(false)
     }).finally(() => {
     })

@@ -3,6 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 import './App.css';
 import Home from './pages/Home';
 import Header from "./components/Header";
+import { ToastContainer } from 'react-toastify';
 
 class App extends Component {
   render() {
@@ -12,6 +13,7 @@ class App extends Component {
         <Switch>
           <Route exact path='/' component={Home}/>
         </Switch>
+        <ToastContainer />
       </div>
     );
   }

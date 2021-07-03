@@ -5,33 +5,19 @@ import {useHomeContext} from "../pages/Home";
 import {deleteFile, saveFile} from "../apis";
 import * as XLSX from "xlsx";
 import {debounce} from "../helpers";
+import {toast} from "react-toastify";
 
 function FileActions() {
-  const {selectedItem, loading, setLoading, gridData, setSelectedItem, setReloadFileList} = useHomeContext()
-
-  function handleSave() {
-    setLoading('save');
-    return saveFile({
-      data: gridData.data,
-      fileName: selectedItem.name,
-      sheetName: gridData.sheetName
-    }).then(rs => {
-      return rs;
-    }).catch(() => {
-      alert("Something went wrong!")
-    }).finally(() => {
-      setLoading(false)
-    })
-  }
+  const {selectedItem, loading, setLoading, gridData, setSelectedItem, setReloadFileList, handleSave} = useHomeContext()
 
   function handleDelete() {
     setLoading('delete');
     return deleteFile(selectedItem.name).then(rs => {
-      alert(rs.message)
+      toast.success(rs.message)
       setSelectedItem(null);
       setReloadFileList(true)
     }).catch(() => {
-      alert("Something went wrong!")
+      toast.error('Something went wrong!')
     }).finally(() => {
       setLoading(false)
     })
@@ -41,14 +27,17 @@ function FileActions() {
     setLoading('export');
     handleSave().then(rs => {
       XLSX.writeFile(rs.wb, rs.fileName)
+      toast.success('Export Successfully!')
     }).catch(() => {
-      alert("Something went wrong!")
+      toast.error('Something went wrong!')
     }).finally(() => {
       setLoading(false)
     })
   }, [gridData, selectedItem])
 
-  const debounceSaving = debounce(handleSave)
+  const handlSaveWithMessage = ()=> {
+    handleSave(rs => toast.success('Save Successfully!'))
+  }
 
   return (
     <div style={{textAlign: 'right'}}>
@@ -62,7 +51,7 @@ function FileActions() {
         {loading === 'export' && <Spinner size={'sm'}>{' '}</Spinner>}
       </Button>
       {' '}
-      <Button disabled={!selectedItem} onClick={debounceSaving} color="primary">
+      <Button disabled={!selectedItem} onClick={handlSaveWithMessage} color="primary">
         Save
         {' '}
         {loading === 'save' && <Spinner size={'sm'}>{' '}</Spinner>}
