@@ -25,13 +25,9 @@ function FileActions() {
 
   const handleExport = React.useCallback(() => {
     setLoading('export');
-    handleSave().then(rs => {
+    handleSave((rs) => {
       XLSX.writeFile(rs.wb, rs.fileName)
       toast.success('Export Successfully!')
-    }).catch(() => {
-      toast.error('Something went wrong!')
-    }).finally(() => {
-      setLoading(false)
     })
   }, [gridData, selectedItem])
 
